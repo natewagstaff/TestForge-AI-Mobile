@@ -74,6 +74,29 @@ export async function generateTestCases(reqId: string, kbEntryIds: string[] = []
   return res.json();
 }
 
+/** Updates the status of a test case (Draft / Reviewed / Rejected). */
+export async function updateTestCaseStatus(tcId: string, status: 'Draft' | 'Reviewed' | 'Rejected') {
+  const res = await fetch(`${BASE_URL}/testcases/${encodeURIComponent(tcId)}/status`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...await authHeader() },
+    body: JSON.stringify({ status }),
+  });
+  return res.json();
+}
+
+/** Updates the title, type, and/or steps of a test case. */
+export async function updateTestCase(
+  tcId: string,
+  data: { title?: string; type?: string; steps?: Array<{ step: string; expectedResult: string }> },
+) {
+  const res = await fetch(`${BASE_URL}/testcases/${encodeURIComponent(tcId)}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...await authHeader() },
+    body: JSON.stringify(data),
+  });
+  return res.json();
+}
+
 /** Deletes a list of test cases by ID from the TestForge backend. */
 export async function deleteTestCases(ids: string[]) {
   const res = await fetch(`${BASE_URL}/testcases/bulk`, {

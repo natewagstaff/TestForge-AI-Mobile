@@ -35,6 +35,8 @@ type Props = {
   selectable?: boolean;
   selected?: boolean;
   onToggleSelect?: () => void;
+  onStatusChange?: (tcId: string, status: 'Reviewed' | 'Rejected') => void;
+  onEdit?: (testCase: Props['testCase']) => void;
 };
 
 function parseJson<T>(raw: string | T | undefined, fallback: T): T {
@@ -113,7 +115,7 @@ function BulletList({ items, color }: { items: string[]; color: string }) {
 // Renders a collapsible test case card. Tap the header to expand/collapse the
 // whole card, then tap individual section headers to expand/collapse each section.
 // When selectable is true, tapping the header toggles selection instead.
-const TestcaseComponent = ({ testCase, selectable, selected, onToggleSelect }: Props) => {
+const TestcaseComponent = ({ testCase, selectable, selected, onToggleSelect, onStatusChange, onEdit }: Props) => {
   const { theme } = useTheme();
 
   const [cardOpen,    setCardOpen]    = useState(false);
@@ -311,6 +313,39 @@ const TestcaseComponent = ({ testCase, selectable, selected, onToggleSelect }: P
             </>
           )}
 
+          {/* ACTION BUTTONS — approve / reject / edit */}
+          {!selectable && (onStatusChange || onEdit) && (
+            <View style={[styles.actionRow, { borderTopColor: theme.border }]}>
+              {onEdit && (
+                <TouchableOpacity
+                  onPress={() => onEdit(testCase)}
+                  style={[styles.actionBtn, { borderColor: theme.border }]}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.actionBtnText, { color: theme.text }]}>Edit</Text>
+                </TouchableOpacity>
+              )}
+              {onStatusChange && testCase.status !== 'Rejected' && (
+                <TouchableOpacity
+                  onPress={() => onStatusChange(testCase.tc_id!, 'Rejected')}
+                  style={[styles.rejectBtn, { backgroundColor: theme.red }]}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.actionBtnText, { color: '#fff' }]}>Reject</Text>
+                </TouchableOpacity>
+              )}
+              {onStatusChange && testCase.status !== 'Reviewed' && (
+                <TouchableOpacity
+                  onPress={() => onStatusChange(testCase.tc_id!, 'Reviewed')}
+                  style={styles.approveBtn}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.actionBtnText, { color: '#fff' }]}>Approve</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
+
         </View>
       )}
     </View>
@@ -465,5 +500,33 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 17,
     fontStyle: "italic",
+  },
+  actionRow: {
+    flexDirection: "row",
+    gap: 8,
+    padding: 12,
+    borderTopWidth: 1,
+    justifyContent: "flex-end",
+  },
+  actionBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  approveBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 8,
+    backgroundColor: "#22c55e",
+  },
+  rejectBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 8,
+  },
+  actionBtnText: {
+    fontSize: 13,
+    fontWeight: "600",
   },
 });

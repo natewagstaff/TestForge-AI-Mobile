@@ -1,5 +1,6 @@
-import { getTestCases, deleteTestCases } from '@/api/testforge';
+import { getTestCases, deleteTestCases, updateTestCaseStatus, updateTestCase } from '@/api/testforge';
 import TestcaseComponent from '@/components/testcase';
+import TestCaseEditor from '@/components/TestCaseEditor';
 import { useTheme } from '../../context/ThemeContext';
 import { useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -12,6 +13,7 @@ export default function TestCasesScreen() {
   const [selecting, setSelecting] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState(false);
+  const [editingTc, setEditingTc] = useState<any | null>(null);
 
   useEffect(() => {
     loadTestCases();
@@ -29,6 +31,21 @@ export default function TestCasesScreen() {
       next.has(id) ? next.delete(id) : next.add(id);
       return next;
     });
+  }
+
+  // Updates a test case's status locally and on the server
+  async function handleStatusChange(tcId: string, status: 'Reviewed' | 'Rejected') {
+    setTestCases(prev => prev.map(tc => tc.tc_id === tcId ? { ...tc, status } : tc));
+    await updateTestCaseStatus(tcId, status);
+  }
+
+  // Saves edited title, type, and steps; resets status to Draft
+  async function handleSave(tcId: string, data: { title: string; type: string; steps: any[] }) {
+    setEditingTc(null);
+    setTestCases(prev => prev.map(tc =>
+      tc.tc_id === tcId ? { ...tc, ...data, status: 'Draft' } : tc
+    ));
+    await updateTestCase(tcId, data);
   }
 
   // Exits selection mode and clears the selection
@@ -111,12 +128,21 @@ export default function TestCasesScreen() {
             selectable={selecting}
             selected={selectedIds.has(tc.tc_id)}
             onToggleSelect={() => toggleSelect(tc.tc_id)}
+            onStatusChange={selecting ? undefined : handleStatusChange}
+            onEdit={selecting ? undefined : setEditingTc}
           />
         ))}
         {testCases.length === 0 && (
           <Text style={[styles.empty, { color: theme.textMuted }]}>No test cases yet.</Text>
         )}
       </ScrollView>
+
+      <TestCaseEditor
+        visible={editingTc !== null}
+        testCase={editingTc}
+        onSave={handleSave}
+        onCancel={() => setEditingTc(null)}
+      />
     </View>
   );
 }
