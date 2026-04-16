@@ -1,98 +1,61 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import DropdownComponent from "@/components/dropdown";
+import TestcaseComponent from "@/components/testcase";
+import { Link } from "expo-router";
+import {useEffect, useState } from "react";
+import { Button, ScrollView, StyleSheet, Text, View } from "react-native";
+import { getRequirements, generateTestCases } from "@/api/testforge";
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
-
-export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
-
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
-}
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flexGrow: 1,
+    alignItems: "center",
+    backgroundColor: "#2C5058",
+    paddingVertical: 100,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  text: {
+    fontSize: 24,
+    color: "#C8DDD8",
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
+  
 });
+
+export default function Index() {
+  // fetch requirements and pass to dropdown
+  const [requirements, setRequirements] = useState([]);
+
+    useEffect(() => {
+      getRequirements().then(data => {
+        const formatted = data.map((r:any) => ({ label: r.title, value: r.req_id }));
+        setRequirements(formatted);
+      });
+    }, []);
+
+    const [selectedReqId, setSelectedReqId] = useState<string | null>(null);
+    const [testCases, setTestCases] = useState<any[]>([]);
+    const [loading, setLoading] = useState(false);
+
+    const handleGenerate = () => {
+      if (!selectedReqId) return;
+      setLoading(true);
+      generateTestCases(selectedReqId).then(res => {
+        console.log(res);
+        setTestCases(res.testcases || []);
+        setLoading(false);
+      });
+    };
+
+
+
+  return (
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.text}>Select a Requirement:</Text>
+      <DropdownComponent data={requirements} onSelect={setSelectedReqId} />
+      <Button title="Generate Test Case" onPress={handleGenerate} />
+      {loading && <Text>Generating...</Text>}
+      {testCases.map(tc => (
+        <TestcaseComponent key={tc.id} testCase={tc} />
+      ))}
+    </ScrollView>
+  );
+}
