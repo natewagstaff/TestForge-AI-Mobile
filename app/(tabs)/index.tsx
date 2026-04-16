@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { router } from "expo-router";
 import {
   ActivityIndicator,
   LayoutAnimation,
@@ -326,6 +327,14 @@ export default function DashboardScreen() {
                               ))}
                             </View>
                           )}
+
+                          <TouchableOpacity
+                            onPress={() => router.push(`/(tabs)/generate?reqId=${encodeURIComponent(gap.req_id)}`)}
+                            style={[styles.generateBtn, { backgroundColor: theme.accent }]}
+                            activeOpacity={0.8}
+                          >
+                            <Text style={[styles.generateBtnText, { color: theme.bg }]}>Generate Tests</Text>
+                          </TouchableOpacity>
                         </View>
                       )}
                     </TouchableOpacity>
@@ -666,6 +675,16 @@ const styles = StyleSheet.create({
   tagText: {
     fontSize: 11,
     fontWeight: "600",
+  },
+  generateBtn: {
+    marginTop: 10,
+    paddingVertical: 9,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  generateBtnText: {
+    fontSize: 13,
+    fontWeight: "700",
   },
   // KB section bars
   sectionBarRow: {

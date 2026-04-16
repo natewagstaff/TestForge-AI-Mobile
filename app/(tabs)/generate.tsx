@@ -3,6 +3,7 @@ import TestcaseComponent from "@/components/testcase";
 import KbPicker from "@/components/KbPicker";
 import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useLocalSearchParams } from "expo-router";
 import { getRequirements, generateTestCases, getMatchedKbEntries } from "@/api/testforge";
 import { useTheme } from "../../context/ThemeContext";
 
@@ -22,6 +23,7 @@ const FOCUSES = [
 
 export default function GenerateScreen() {
   const { theme } = useTheme();
+  const { reqId: paramReqId } = useLocalSearchParams<{ reqId?: string }>();
 
   const [requirements, setRequirements]     = useState([]);
   const [selectedReqId, setSelectedReqId]   = useState<string | null>(null);
@@ -38,6 +40,11 @@ export default function GenerateScreen() {
       setRequirements(formatted);
     });
   }, []);
+
+  // Pre-select requirement when navigated from the Coverage Dashboard
+  useEffect(() => {
+    if (paramReqId) handleSelectReq(paramReqId);
+  }, [paramReqId]);
 
   function handleSelectReq(reqId: string) {
     setSelectedReqId(reqId);
