@@ -40,12 +40,20 @@ export async function getTestCases() {
   return res.json();
 }
 
+/** Fetches KB entries that match a requirement by tag or direct relation. */
+export async function getMatchedKbEntries(reqId: string) {
+  const res = await fetch(`${BASE_URL}/kb/matched/${encodeURIComponent(reqId)}`, {
+    headers: await authHeader(),
+  });
+  return res.json();
+}
+
 /** Sends a requirement ID to the backend to generate test cases at basic depth using the Claude API. */
-export async function generateTestCases(reqId: string) {
+export async function generateTestCases(reqId: string, kbEntryIds: string[] = []) {
   const res = await fetch(`${BASE_URL}/testcases/generate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...await authHeader() },
-    body: JSON.stringify({ reqId, depth: 'basic', generatedBy: 'Mobile App' }),
+    body: JSON.stringify({ reqId, depth: 'basic', generatedBy: 'Mobile App', kbEntryIds }),
   });
   return res.json();
 }
