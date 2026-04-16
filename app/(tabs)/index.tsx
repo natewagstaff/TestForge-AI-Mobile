@@ -3,7 +3,7 @@ import TestcaseComponent from "@/components/testcase";
 import KbPicker from "@/components/KbPicker";
 import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { getRequirements, generateTestCases } from "@/api/testforge";
+import { getRequirements, generateTestCases, getMatchedKbEntries } from "@/api/testforge";
 import { useTheme } from "../../context/ThemeContext";
 
 // Home screen — select a requirement, optionally pick KB entries, then generate test cases
@@ -24,10 +24,15 @@ export default function Index() {
     });
   }, []);
 
-  // When a requirement is selected, reset KB selection
+  // When a requirement is selected, pre-select its matched KB entries
   function handleSelectReq(reqId: string) {
     setSelectedReqId(reqId);
     setSelectedKbIds(new Set());
+    getMatchedKbEntries(reqId).then(data => {
+      if (Array.isArray(data) && data.length > 0) {
+        setSelectedKbIds(new Set(data.map((kb: any) => kb.kb_id)));
+      }
+    });
   }
 
   // Toggles a KB entry in/out of the selection set
