@@ -78,6 +78,23 @@ export async function getKbEntries() {
   return res.json();
 }
 
+/** Fetches the daily coverage gap insight (cached per day). */
+export async function getCoverageGapInsight() {
+  const res = await fetch(`${serverBase}/api/insights/coverage-gaps`, {
+    headers: await authHeader(),
+  });
+  return res.json();
+}
+
+/** Forces a fresh coverage gap insight computation (Admin / QA Manager only). */
+export async function refreshCoverageGapInsight() {
+  const res = await fetch(`${serverBase}/api/insights/coverage-gaps/refresh`, {
+    method: 'POST',
+    headers: await authHeader(),
+  });
+  return res.json();
+}
+
 /** Fetches KB entries that match a requirement by tag or direct relation. */
 export async function getMatchedKbEntries(reqId: string) {
   const res = await fetch(`${serverBase}/api/kb/matched/${encodeURIComponent(reqId)}`, {

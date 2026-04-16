@@ -16,9 +16,10 @@ export default function TabLayout() {
         tabBarInactiveTintColor: theme.textMuted,
       }}
     >
-      <Tabs.Screen name="index" options={{ title: 'Home' }} />
+      <Tabs.Screen name="index"     options={{ title: 'Coverage' }} />
+      <Tabs.Screen name="generate"  options={{ title: 'Generate' }} />
       <Tabs.Screen name="testCases" options={{ title: 'Test Cases' }} />
-      <Tabs.Screen name="settings" options={{ title: 'Themes' }} />
+      <Tabs.Screen name="settings"  options={{ title: 'Settings' }} />
     </Tabs>
   );
 }
