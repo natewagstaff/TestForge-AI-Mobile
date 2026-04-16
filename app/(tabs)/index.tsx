@@ -1,13 +1,21 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  LayoutAnimation,
+  Platform,
   RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
+  UIManager,
   View,
 } from "react-native";
+
+// Enable layout animation on Android
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 import { getRequirements, getTestCases, getKbSections, getKbEntries, getCoverageGapInsight, refreshCoverageGapInsight } from "@/api/testforge";
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
@@ -66,6 +74,12 @@ export default function DashboardScreen() {
   const [gapInsight,    setGapInsight]    = useState<any | null>(null);
   const [gapLoading,    setGapLoading]    = useState(true);
   const [gapRefreshing, setGapRefreshing] = useState(false);
+  const [expandedGapId, setExpandedGapId] = useState<string | null>(null);
+
+  const toggleGapRow = (reqId: string) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setExpandedGapId(prev => (prev === reqId ? null : reqId));
+  };
 
   const load = useCallback(async () => {
     const [reqs, tcs, sections, entries] = await Promise.all([
@@ -216,35 +230,107 @@ export default function DashboardScreen() {
                 <Text style={[styles.insightSubLabel, { color: theme.textMuted }]}>
                   TOP READY-TO-TEST REQUIREMENTS
                 </Text>
-                {gapInsight.gaps.map((gap: any, idx: number) => (
-                  <View
-                    key={gap.req_id}
-                    style={[
-                      styles.gapRow,
-                      idx < gapInsight.gaps.length - 1 && { borderBottomWidth: 1, borderBottomColor: theme.border },
-                    ]}
-                  >
-                    <Text style={[styles.gapIndex, { color: theme.textMuted }]}>{idx + 1}.</Text>
-                    <Text style={[styles.gapReqId, { color: theme.accent }]}>{gap.req_id}</Text>
-                    <Text style={[styles.gapTitle, { color: theme.text }]} numberOfLines={1}>{gap.title}</Text>
-                    <View style={[
-                      styles.kbBadge,
-                      { backgroundColor: gap.kb_match_count > 0 ? theme.accent + '22' : 'transparent',
-                        borderColor: gap.kb_match_count > 0 ? 'transparent' : theme.border },
-                    ]}>
-                      <Text style={[styles.kbBadgeText, { color: gap.kb_match_count > 0 ? theme.accent : theme.textMuted }]}>
-                        {gap.kb_match_count > 0 ? `${gap.kb_match_count} KB` : 'no KB'}
-                      </Text>
-                    </View>
-                    {gap.priority && (
-                      <View style={[styles.priorityBadge, { backgroundColor: priorityColor(gap.priority) + '22', borderColor: priorityColor(gap.priority) + '44' }]}>
-                        <Text style={[styles.priorityBadgeText, { color: priorityColor(gap.priority) }]}>
-                          {gap.priority}
+                {gapInsight.gaps.map((gap: any, idx: number) => {
+                  const expanded = expandedGapId === gap.req_id;
+                  // Look up full requirement details from already-loaded requirements
+                  const fullReq = requirements.find((r: any) => r.req_id === gap.req_id);
+                  const tags: string[] = fullReq?.tags ?? [];
+                  const criteria: string[] = fullReq?.acceptance_criteria ?? [];
+                  const description: string = fullReq?.description ?? '';
+                  const module: string = fullReq?.module ?? '';
+
+                  return (
+                    <TouchableOpacity
+                      key={gap.req_id}
+                      onPress={() => toggleGapRow(gap.req_id)}
+                      activeOpacity={0.7}
+                      style={[
+                        styles.gapRow,
+                        idx < gapInsight.gaps.length - 1 && { borderBottomWidth: 1, borderBottomColor: theme.border },
+                      ]}
+                    >
+                      {/* ── collapsed row ── */}
+                      <View style={styles.gapRowHeader}>
+                        <Text style={[styles.gapIndex, { color: theme.textMuted }]}>{idx + 1}.</Text>
+                        <Text style={[styles.gapReqId, { color: theme.accent }]}>{gap.req_id}</Text>
+                        <Text
+                          style={[styles.gapTitle, { color: theme.text }]}
+                          numberOfLines={expanded ? undefined : 1}
+                        >
+                          {gap.title}
+                        </Text>
+                        <View style={[
+                          styles.kbBadge,
+                          { backgroundColor: gap.kb_match_count > 0 ? theme.accent + '22' : 'transparent',
+                            borderColor: gap.kb_match_count > 0 ? 'transparent' : theme.border },
+                        ]}>
+                          <Text style={[styles.kbBadgeText, { color: gap.kb_match_count > 0 ? theme.accent : theme.textMuted }]}>
+                            {gap.kb_match_count > 0 ? `${gap.kb_match_count} KB` : 'no KB'}
+                          </Text>
+                        </View>
+                        {gap.priority && (
+                          <View style={[styles.priorityBadge, { backgroundColor: priorityColor(gap.priority) + '22', borderColor: priorityColor(gap.priority) + '44' }]}>
+                            <Text style={[styles.priorityBadgeText, { color: priorityColor(gap.priority) }]}>
+                              {gap.priority}
+                            </Text>
+                          </View>
+                        )}
+                        <Text style={[styles.gapChevron, { color: theme.textMuted }]}>
+                          {expanded ? '▲' : '▼'}
                         </Text>
                       </View>
-                    )}
-                  </View>
-                ))}
+
+                      {/* ── expanded details ── */}
+                      {expanded && (
+                        <View style={[styles.gapDetail, { borderTopColor: theme.border }]}>
+                          {(module || fullReq?.status) && (
+                            <View style={styles.gapDetailMeta}>
+                              {module ? (
+                                <View style={[styles.metaChip, { backgroundColor: theme.border }]}>
+                                  <Text style={[styles.metaChipText, { color: theme.textMuted }]}>{module}</Text>
+                                </View>
+                              ) : null}
+                              {fullReq?.status ? (
+                                <View style={[styles.metaChip, { backgroundColor: theme.border }]}>
+                                  <Text style={[styles.metaChipText, { color: theme.textMuted }]}>{fullReq.status}</Text>
+                                </View>
+                              ) : null}
+                            </View>
+                          )}
+
+                          {description ? (
+                            <>
+                              <Text style={[styles.gapDetailLabel, { color: theme.textMuted }]}>DESCRIPTION</Text>
+                              <Text style={[styles.gapDetailBody, { color: theme.text }]}>{description}</Text>
+                            </>
+                          ) : null}
+
+                          {criteria.length > 0 && (
+                            <>
+                              <Text style={[styles.gapDetailLabel, { color: theme.textMuted }]}>ACCEPTANCE CRITERIA</Text>
+                              {criteria.map((c, i) => (
+                                <View key={i} style={styles.criteriaRow}>
+                                  <Text style={[styles.criteriaBullet, { color: theme.accent }]}>·</Text>
+                                  <Text style={[styles.criteriaText, { color: theme.text }]}>{c}</Text>
+                                </View>
+                              ))}
+                            </>
+                          )}
+
+                          {tags.length > 0 && (
+                            <View style={styles.tagRow}>
+                              {tags.map((t: string) => (
+                                <View key={t} style={[styles.tag, { backgroundColor: theme.accent + '18', borderColor: theme.accent + '44' }]}>
+                                  <Text style={[styles.tagText, { color: theme.accent }]}>{t}</Text>
+                                </View>
+                              ))}
+                            </View>
+                          )}
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
                 <Text style={[styles.insightFooter, { color: theme.textMuted }]}>
                   {gapInsight.total_untested} untested of {gapInsight.total_requirements} total requirements
                   {gapInsight.generated_at
@@ -512,6 +598,76 @@ const styles = StyleSheet.create({
   insightUnavailable: {
     fontSize: 12,
     paddingVertical: 4,
+  },
+  // gap row expand/collapse
+  gapRowHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  gapChevron: {
+    fontSize: 10,
+    marginLeft: 2,
+  },
+  gapDetail: {
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    gap: 6,
+  },
+  gapDetailMeta: {
+    flexDirection: "row",
+    gap: 6,
+    marginBottom: 4,
+  },
+  metaChip: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 4,
+  },
+  metaChipText: {
+    fontSize: 11,
+    fontWeight: "600",
+  },
+  gapDetailLabel: {
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 0.6,
+    marginTop: 4,
+  },
+  gapDetailBody: {
+    fontSize: 13,
+    lineHeight: 19,
+  },
+  criteriaRow: {
+    flexDirection: "row",
+    gap: 6,
+    alignItems: "flex-start",
+  },
+  criteriaBullet: {
+    fontSize: 16,
+    lineHeight: 20,
+  },
+  criteriaText: {
+    fontSize: 13,
+    lineHeight: 19,
+    flex: 1,
+  },
+  tagRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6,
+    marginTop: 4,
+  },
+  tag: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 4,
+    borderWidth: 1,
+  },
+  tagText: {
+    fontSize: 11,
+    fontWeight: "600",
   },
   // KB section bars
   sectionBarRow: {
