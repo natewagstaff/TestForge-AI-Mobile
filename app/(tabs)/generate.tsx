@@ -81,7 +81,7 @@ export default function GenerateScreen() {
       <Text style={[styles.title, { color: theme.textBright }]}>Generate</Text>
       <Text style={[styles.label, { color: theme.textMuted }]}>Select a Requirement</Text>
 
-      <DropdownComponent data={requirements} onSelect={handleSelectReq} />
+      <DropdownComponent data={requirements} onSelect={handleSelectReq} selectedValue={selectedReqId} />
 
       {selectedReqId && (
         <TouchableOpacity

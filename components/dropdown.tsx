@@ -1,5 +1,5 @@
 import AntDesign from "@expo/vector-icons/AntDesign";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import { useTheme } from "../context/ThemeContext";
@@ -12,12 +12,18 @@ type dropdownItem = {
 type props = {
   data: dropdownItem[];
   onSelect: (reqId: string) => void;
+  selectedValue?: string | null;
 };
 
 // Renders a searchable dropdown populated with requirements; calls onSelect when a requirement is chosen
-const DropdownComponent = ({ data, onSelect }: props) => {
+const DropdownComponent = ({ data, onSelect, selectedValue }: props) => {
   const { theme } = useTheme();
   const [value, setValue] = useState<string | null>(null);
+
+  // Sync when a pre-selected value is passed in (e.g. navigating from the dashboard)
+  useEffect(() => {
+    if (selectedValue !== undefined) setValue(selectedValue ?? null);
+  }, [selectedValue]);
   const [isFocus, setIsFocus] = useState(false);
 
   // Renders a floating label above the dropdown when an item is selected or the dropdown is focused
