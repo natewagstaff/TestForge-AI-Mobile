@@ -17,9 +17,9 @@ export default function TestCasesScreen() {
     loadTestCases();
   }, []);
 
-  // Fetches all test cases from the backend and updates state
+  // Fetches all test cases from the backend and updates state, newest first
   function loadTestCases() {
-    getTestCases().then(data => setTestCases(data));
+    getTestCases().then(data => setTestCases([...data].reverse()));
   }
 
   // Toggles whether a test case is selected

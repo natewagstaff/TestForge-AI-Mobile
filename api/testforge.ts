@@ -40,6 +40,22 @@ export async function getTestCases() {
   return res.json();
 }
 
+/** Fetches all KB sections with their subsections. */
+export async function getKbSections() {
+  const res = await fetch(`${BASE_URL}/kb/sections`, {
+    headers: await authHeader(),
+  });
+  return res.json();
+}
+
+/** Fetches all KB entries. */
+export async function getKbEntries() {
+  const res = await fetch(`${BASE_URL}/kb`, {
+    headers: await authHeader(),
+  });
+  return res.json();
+}
+
 /** Fetches KB entries that match a requirement by tag or direct relation. */
 export async function getMatchedKbEntries(reqId: string) {
   const res = await fetch(`${BASE_URL}/kb/matched/${encodeURIComponent(reqId)}`, {
