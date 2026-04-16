@@ -14,6 +14,7 @@ export default function Index() {
   const [selectedReqId, setSelectedReqId]   = useState<string | null>(null);
   const [selectedKbIds, setSelectedKbIds]   = useState<Set<string>>(new Set());
   const [kbPickerOpen, setKbPickerOpen]     = useState(false);
+  const [depth, setDepth]                   = useState<'basic' | 'standard' | 'comprehensive'>('basic');
   const [testCases, setTestCases]           = useState<any[]>([]);
   const [loading, setLoading]               = useState(false);
 
@@ -48,7 +49,7 @@ export default function Index() {
   const handleGenerate = () => {
     if (!selectedReqId) return;
     setLoading(true);
-    generateTestCases(selectedReqId, [...selectedKbIds]).then(res => {
+    generateTestCases(selectedReqId, [...selectedKbIds], depth).then(res => {
       setTestCases(res.testcases || []);
       setLoading(false);
     });
@@ -84,6 +85,25 @@ export default function Index() {
           <Text style={[styles.kbChevron, { color: theme.textMuted }]}>›</Text>
         </TouchableOpacity>
       )}
+
+      {/* Depth selector */}
+      <View style={[styles.depthRow, { borderColor: theme.border, backgroundColor: theme.surface }]}>
+        {(['basic', 'standard', 'comprehensive'] as const).map(d => (
+          <TouchableOpacity
+            key={d}
+            onPress={() => setDepth(d)}
+            style={[
+              styles.depthBtn,
+              depth === d && { backgroundColor: theme.accent },
+            ]}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.depthBtnText, { color: depth === d ? theme.bg : theme.textMuted }]}>
+              {d.charAt(0).toUpperCase() + d.slice(1)}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
 
       <TouchableOpacity
         onPress={handleGenerate}
@@ -173,6 +193,23 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 16,
+    fontWeight: "600",
+  },
+  depthRow: {
+    flexDirection: "row",
+    width: "90%",
+    marginTop: 12,
+    borderWidth: 1,
+    borderRadius: 10,
+    overflow: "hidden",
+  },
+  depthBtn: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: "center",
+  },
+  depthBtnText: {
+    fontSize: 13,
     fontWeight: "600",
   },
 });

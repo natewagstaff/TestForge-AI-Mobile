@@ -86,12 +86,16 @@ export async function getMatchedKbEntries(reqId: string) {
   return res.json();
 }
 
-/** Sends a requirement ID to the backend to generate test cases at basic depth using the Claude API. */
-export async function generateTestCases(reqId: string, kbEntryIds: string[] = []) {
+/** Sends a requirement ID to the backend to generate test cases using the Claude API. */
+export async function generateTestCases(
+  reqId: string,
+  kbEntryIds: string[] = [],
+  depth: 'basic' | 'standard' | 'comprehensive' = 'basic',
+) {
   const res = await fetch(`${serverBase}/api/testcases/generate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...await authHeader() },
-    body: JSON.stringify({ reqId, depth: 'basic', generatedBy: 'Mobile App', kbEntryIds }),
+    body: JSON.stringify({ reqId, depth, generatedBy: 'Mobile App', kbEntryIds }),
   });
   return res.json();
 }
