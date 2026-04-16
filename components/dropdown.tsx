@@ -14,10 +14,12 @@ type props = {
   onSelect: (reqId: string) => void;
 };
 
+// Renders a searchable dropdown populated with requirements; calls onSelect when a requirement is chosen
 const DropdownComponent = ({data, onSelect}: props) => {
   const [value, setValue] = useState<string | null>(null);
   const [isFocus, setIsFocus] = useState(false);
 
+  // Renders a floating label above the dropdown when an item is selected or the dropdown is focused
   const renderLabel = () => {
     if (value || isFocus) {
       return (

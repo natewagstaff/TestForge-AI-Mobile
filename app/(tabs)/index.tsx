@@ -20,6 +20,7 @@ const styles = StyleSheet.create({
   
 });
 
+// Home screen — loads requirements into the dropdown and allows the user to generate test cases
 export default function Index() {
   // fetch requirements and pass to dropdown
   const [requirements, setRequirements] = useState([]);
@@ -35,6 +36,7 @@ export default function Index() {
     const [testCases, setTestCases] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
 
+    // Calls the backend to generate test cases for the selected requirement and updates state with the results
     const handleGenerate = () => {
       if (!selectedReqId) return;
       setLoading(true);

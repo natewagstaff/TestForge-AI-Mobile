@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
 
 
+// Renders a single test case card showing its title and description
 const TestcaseComponent = ({ testCase }: { testCase: any }) => {
 
 const styles = StyleSheet.create({

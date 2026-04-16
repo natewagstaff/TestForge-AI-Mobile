@@ -5,6 +5,7 @@ import TestcaseComponent from '@/components/testcase';
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text } from 'react-native';
 
+// Test Cases screen — fetches and displays all test cases from the TestForge database
 export default function AboutScreen() {
 
     type TestCases = any[];
