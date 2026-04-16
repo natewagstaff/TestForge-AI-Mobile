@@ -546,10 +546,8 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   gapRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: "column",
     paddingVertical: 9,
-    gap: 6,
   },
   gapIndex: {
     fontSize: 10,
