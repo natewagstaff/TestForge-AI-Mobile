@@ -6,6 +6,12 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-nati
 import { getRequirements, generateTestCases, getMatchedKbEntries } from "@/api/testforge";
 import { useTheme } from "../../context/ThemeContext";
 
+const DEPTH_OPTIONS = [
+  { key: 'basic',          label: 'Basic',          range: '2–3 tests' },
+  { key: 'standard',       label: 'Standard',       range: '4–6 tests' },
+  { key: 'comprehensive',  label: 'Comprehensive',  range: '6–10 tests' },
+] as const;
+
 const FOCUSES = [
   { key: 'safety_critical',  label: 'Safety Critical',  color: '#ef4444' },
   { key: 'ui_ux_validation', label: 'UI/UX',            color: '#3b82f6' },
@@ -97,18 +103,18 @@ export default function Index() {
 
       {/* Depth selector */}
       <View style={[styles.depthRow, { borderColor: theme.border, backgroundColor: theme.surface }]}>
-        {(['basic', 'standard', 'comprehensive'] as const).map(d => (
+        {DEPTH_OPTIONS.map(d => (
           <TouchableOpacity
-            key={d}
-            onPress={() => setDepth(d)}
-            style={[
-              styles.depthBtn,
-              depth === d && { backgroundColor: theme.accent },
-            ]}
+            key={d.key}
+            onPress={() => setDepth(d.key)}
+            style={[styles.depthBtn, depth === d.key && { backgroundColor: theme.accent }]}
             activeOpacity={0.7}
           >
-            <Text style={[styles.depthBtnText, { color: depth === d ? theme.bg : theme.textMuted }]}>
-              {d.charAt(0).toUpperCase() + d.slice(1)}
+            <Text style={[styles.depthBtnText, { color: depth === d.key ? theme.bg : theme.textMuted }]}>
+              {d.label}
+            </Text>
+            <Text style={[styles.depthBtnRange, { color: depth === d.key ? theme.bg : theme.textMuted, opacity: depth === d.key ? 0.75 : 1 }]}>
+              {d.range}
             </Text>
           </TouchableOpacity>
         ))}
@@ -247,6 +253,10 @@ const styles = StyleSheet.create({
   depthBtnText: {
     fontSize: 13,
     fontWeight: "600",
+  },
+  depthBtnRange: {
+    fontSize: 10,
+    marginTop: 2,
   },
   focusSection: {
     width: "90%",
