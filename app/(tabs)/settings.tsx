@@ -1,14 +1,22 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, StatusBar } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, ScrollView, TextInput, TouchableOpacity, StyleSheet, StatusBar } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { THEMES, THEME_CATEGORIES } from '../../constants/theme';
 import ThemeSwatch from '../../components/ThemeSwatch';
+import { getServerUrl, setServerUrl } from '../../api/testforge';
 
 /** Settings screen — lets the user browse and select a theme, organized by category. */
 export default function SettingsScreen() {
   const { theme, themeKey, setThemeKey } = useTheme();
   const { user, signOut } = useAuth();
+
+  const [serverDraft, setServerDraft] = useState('');
+  const [serverSaved, setServerSaved] = useState(false);
+
+  useEffect(() => {
+    setServerDraft(getServerUrl());
+  }, []);
 
   return (
     <ScrollView
@@ -16,6 +24,36 @@ export default function SettingsScreen() {
       contentContainerStyle={styles.container}
     >
       <StatusBar barStyle="light-content" backgroundColor={theme.bg} />
+
+      {/* Server URL */}
+      <Text style={[styles.heading, { color: theme.textBright, marginBottom: 16 }]}>Server</Text>
+      <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border, marginBottom: 24, padding: 14 }]}>
+        <Text style={[styles.categoryLabel, { color: theme.textMuted, marginBottom: 6, marginLeft: 0 }]}>
+          SERVER URL
+        </Text>
+        <TextInput
+          value={serverDraft}
+          onChangeText={v => { setServerDraft(v); setServerSaved(false); }}
+          style={[styles.serverInput, { color: theme.textBright, borderColor: theme.border, backgroundColor: theme.bg }]}
+          placeholder="http://192.168.1.100:3000"
+          placeholderTextColor={theme.textMuted}
+          autoCapitalize="none"
+          autoCorrect={false}
+          keyboardType="url"
+        />
+        <Text style={[styles.serverHint, { color: theme.textMuted }]}>
+          Host and port only — do not include /api
+        </Text>
+        <TouchableOpacity
+          onPress={async () => { await setServerUrl(serverDraft); setServerSaved(true); }}
+          style={[styles.saveBtn, { backgroundColor: theme.accent }]}
+          activeOpacity={0.8}
+        >
+          <Text style={[styles.saveBtnText, { color: theme.bg }]}>
+            {serverSaved ? 'Saved ✓' : 'Save'}
+          </Text>
+        </TouchableOpacity>
+      </View>
 
       {/* User + logout */}
       <View style={[styles.userRow, { backgroundColor: theme.surface, borderColor: theme.border }]}>
@@ -160,5 +198,26 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     marginLeft: 8,
+  },
+  serverInput: {
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    fontSize: 14,
+    marginBottom: 6,
+  },
+  serverHint: {
+    fontSize: 12,
+    marginBottom: 12,
+  },
+  saveBtn: {
+    paddingVertical: 9,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  saveBtnText: {
+    fontSize: 14,
+    fontWeight: '700',
   },
 });
