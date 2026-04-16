@@ -1,50 +1,43 @@
-# Welcome to your Expo app 👋
+# Overview
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+As a software engineer, I am continually looking for ways to bring the tools I build at work into more accessible formats. This project is an exploration of mobile development using React Native — specifically, how to consume a REST API from a mobile client, manage state across screens, and present complex structured data (like AI-generated test cases) in a clean, usable interface.
 
-## Get started
+TestForge Mobile is a React Native app that connects to the TestForge AI backend — a test case generation platform that uses the Claude API to generate software test cases from requirements. The app allows a user to select a requirement from a dropdown, trigger AI-powered test case generation at a basic depth, and view the generated test cases. A second screen displays all test cases stored in the database.
 
-1. Install dependencies
+To use the app:
+1. Launch the app and wait for the requirements dropdown to populate.
+2. Select a requirement from the dropdown on the Home screen.
+3. Tap "Generate Test Case" to send the requirement to the backend and generate a test case using AI.
+4. Scroll down to view the generated test case title and description.
+5. Navigate to the Test Cases tab to browse all test cases in the database.
 
-   ```bash
-   npm install
-   ```
+My purpose in building this is to extend a tool I actively use for QA work into a mobile-first experience, while deepening my understanding of React Native, Expo Router, and cross-platform API integration.
 
-2. Start the app
+[Software Demo Video](https://youtu.be/vLZ-zI5V54M)
 
-   ```bash
-   npx expo start
-   ```
+# Development Environment
 
-In the output, you'll find options to open the app in a
+- **React Native** with **Expo** (Expo Router for file-based navigation)
+- **TypeScript**
+- **VS Code** with the Claude Code extension
+- **Node.js / Express** backend (TestForge AI) running on a local server
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+Libraries used:
+- `react-native-element-dropdown` — searchable dropdown component
+- `@expo/vector-icons` — icon set (AntDesign)
+- `expo-router` — file-based navigation and tab layout
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+# Useful Websites
 
-## Get a fresh project
+* [React Native Docs](https://reactnative.dev/docs/getting-started)
+* [Expo Documentation](https://docs.expo.dev/)
+* [react-native-element-dropdown](https://github.com/hoaphantn7604/react-native-element-dropdown)
+* [Expo Router Docs](https://expo.github.io/router/docs/)
 
-When you're ready, run:
+# Future Work
 
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+* Add a login screen so the app authenticates with the TestForge backend using a real session
+* Support selecting KB entries to include in test case generation
+* Allow switching between generation depths (Basic, Standard, Comprehensive)
+* Display full test case details including steps and preconditions
+* Add the ability to approve or reject generated test cases from the mobile app
