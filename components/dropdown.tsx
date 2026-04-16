@@ -1,8 +1,8 @@
-import { router } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import React, { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
+import { useTheme } from "../context/ThemeContext";
 
 type dropdownItem = {
   label: string;
@@ -15,7 +15,8 @@ type props = {
 };
 
 // Renders a searchable dropdown populated with requirements; calls onSelect when a requirement is chosen
-const DropdownComponent = ({data, onSelect}: props) => {
+const DropdownComponent = ({ data, onSelect }: props) => {
+  const { theme } = useTheme();
   const [value, setValue] = useState<string | null>(null);
   const [isFocus, setIsFocus] = useState(false);
 
@@ -23,7 +24,7 @@ const DropdownComponent = ({data, onSelect}: props) => {
   const renderLabel = () => {
     if (value || isFocus) {
       return (
-        <Text style={[styles.label, isFocus && { color: "blue" }]}>
+        <Text style={[styles.label, { color: isFocus ? theme.accent : theme.textMuted }]}>
           Choose a Requirement
         </Text>
       );
@@ -35,17 +36,25 @@ const DropdownComponent = ({data, onSelect}: props) => {
     <View style={styles.container}>
       {renderLabel()}
       <Dropdown
-        style={[styles.dropdown, isFocus && { borderColor: "blue" }]}
-        placeholderStyle={styles.placeholderStyle}
-        selectedTextStyle={styles.selectedTextStyle}
-        inputSearchStyle={styles.inputSearchStyle}
+        style={[
+          styles.dropdown,
+          {
+            backgroundColor: theme.surface,
+            borderColor: isFocus ? theme.accent : theme.border,
+          },
+        ]}
+        placeholderStyle={[styles.placeholderStyle, { color: theme.textMuted }]}
+        selectedTextStyle={[styles.selectedTextStyle, { color: theme.text }]}
+        inputSearchStyle={[styles.inputSearchStyle, { color: theme.text, borderColor: theme.border }]}
+        containerStyle={{ backgroundColor: theme.surface, borderColor: theme.border }}
+        itemTextStyle={{ color: theme.text }}
         iconStyle={styles.iconStyle}
         data={data}
         search
         maxHeight={300}
         labelField="label"
         valueField="value"
-        placeholder={!isFocus ? "Select item" : "..."}
+        placeholder={!isFocus ? "Select requirement" : "..."}
         searchPlaceholder="Search..."
         value={value}
         onFocus={() => setIsFocus(true)}
@@ -58,7 +67,7 @@ const DropdownComponent = ({data, onSelect}: props) => {
         renderLeftIcon={() => (
           <AntDesign
             style={styles.icon}
-            color={isFocus ? "blue" : "black"}
+            color={isFocus ? theme.accent : theme.textMuted}
             name="safety"
             size={20}
           />
@@ -77,9 +86,7 @@ const styles = StyleSheet.create({
   },
   dropdown: {
     height: 50,
-    backgroundColor: "white",
-    borderColor: "gray",
-    borderWidth: 0.5,
+    borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 8,
   },
