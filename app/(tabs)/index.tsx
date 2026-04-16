@@ -6,6 +6,14 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-nati
 import { getRequirements, generateTestCases, getMatchedKbEntries } from "@/api/testforge";
 import { useTheme } from "../../context/ThemeContext";
 
+const FOCUSES = [
+  { key: 'safety_critical',  label: 'Safety Critical',  color: '#ef4444' },
+  { key: 'ui_ux_validation', label: 'UI/UX',            color: '#3b82f6' },
+  { key: 'boundary_analysis',label: 'Boundary',         color: '#f59e0b' },
+  { key: 'error_recovery',   label: 'Error Recovery',   color: '#a855f7' },
+  { key: 'regression',       label: 'Regression',       color: '#06b6d4' },
+];
+
 // Home screen — select a requirement, optionally pick KB entries, then generate test cases
 export default function Index() {
   const { theme } = useTheme();
@@ -15,6 +23,7 @@ export default function Index() {
   const [selectedKbIds, setSelectedKbIds]   = useState<Set<string>>(new Set());
   const [kbPickerOpen, setKbPickerOpen]     = useState(false);
   const [depth, setDepth]                   = useState<'basic' | 'standard' | 'comprehensive'>('basic');
+  const [focuses, setFocuses]               = useState<Set<string>>(new Set());
   const [testCases, setTestCases]           = useState<any[]>([]);
   const [loading, setLoading]               = useState(false);
 
@@ -49,7 +58,7 @@ export default function Index() {
   const handleGenerate = () => {
     if (!selectedReqId) return;
     setLoading(true);
-    generateTestCases(selectedReqId, [...selectedKbIds], depth).then(res => {
+    generateTestCases(selectedReqId, [...selectedKbIds], depth, [...focuses]).then(res => {
       setTestCases(res.testcases || []);
       setLoading(false);
     });
@@ -103,6 +112,33 @@ export default function Index() {
             </Text>
           </TouchableOpacity>
         ))}
+      </View>
+
+      {/* Focus selector */}
+      <View style={styles.focusSection}>
+        <Text style={[styles.focusLabel, { color: theme.textMuted }]}>FOCUS AREAS</Text>
+        <View style={styles.focusChips}>
+          {FOCUSES.map(f => {
+            const active = focuses.has(f.key);
+            return (
+              <TouchableOpacity
+                key={f.key}
+                onPress={() => setFocuses(prev => {
+                  const next = new Set(prev);
+                  next.has(f.key) ? next.delete(f.key) : next.add(f.key);
+                  return next;
+                })}
+                style={[
+                  styles.focusChip,
+                  { borderColor: f.color, backgroundColor: active ? f.color : f.color + '22' },
+                ]}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.focusChipText, { color: active ? '#fff' : f.color }]}>{f.label}</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
       </View>
 
       <TouchableOpacity
@@ -210,6 +246,31 @@ const styles = StyleSheet.create({
   },
   depthBtnText: {
     fontSize: 13,
+    fontWeight: "600",
+  },
+  focusSection: {
+    width: "90%",
+    marginTop: 12,
+  },
+  focusLabel: {
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 1,
+    marginBottom: 8,
+  },
+  focusChips: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  focusChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1.5,
+  },
+  focusChipText: {
+    fontSize: 12,
     fontWeight: "600",
   },
 });

@@ -91,11 +91,12 @@ export async function generateTestCases(
   reqId: string,
   kbEntryIds: string[] = [],
   depth: 'basic' | 'standard' | 'comprehensive' = 'basic',
+  focuses: string[] = [],
 ) {
   const res = await fetch(`${serverBase}/api/testcases/generate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...await authHeader() },
-    body: JSON.stringify({ reqId, depth, generatedBy: 'Mobile App', kbEntryIds }),
+    body: JSON.stringify({ reqId, depth, focuses, generatedBy: 'Mobile App', kbEntryIds }),
   });
   return res.json();
 }
