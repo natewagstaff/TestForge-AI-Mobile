@@ -84,10 +84,17 @@ export async function updateTestCaseStatus(tcId: string, status: 'Draft' | 'Revi
   return res.json();
 }
 
-/** Updates the title, type, and/or steps of a test case. */
+/** Updates editable fields of a test case. */
 export async function updateTestCase(
   tcId: string,
-  data: { title?: string; type?: string; steps?: Array<{ step: string; expectedResult: string }> },
+  data: {
+    title?: string;
+    type?: string;
+    req_attribute?: string;
+    description?: { objective?: string; scope?: string | string[]; assumptions?: string[] };
+    preconditions?: { preconditions?: string[]; environment?: string[]; equipment?: string[]; testData?: string[] };
+    steps?: Array<{ step: string; expectedResult: string }>;
+  },
 ) {
   const res = await fetch(`${BASE_URL}/testcases/${encodeURIComponent(tcId)}`, {
     method: 'PUT',

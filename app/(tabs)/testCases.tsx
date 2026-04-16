@@ -1,6 +1,6 @@
 import { getTestCases, deleteTestCases, updateTestCaseStatus, updateTestCase } from '@/api/testforge';
 import TestcaseComponent from '@/components/testcase';
-import TestCaseEditor from '@/components/TestCaseEditor';
+import TestCaseEditor, { type SaveData } from '@/components/TestCaseEditor';
 import { useTheme } from '../../context/ThemeContext';
 import { useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -39,8 +39,8 @@ export default function TestCasesScreen() {
     await updateTestCaseStatus(tcId, status);
   }
 
-  // Saves edited title, type, and steps; resets status to Draft
-  async function handleSave(tcId: string, data: { title: string; type: string; steps: any[] }) {
+  // Saves edited fields; resets status to Draft
+  async function handleSave(tcId: string, data: SaveData) {
     setEditingTc(null);
     setTestCases(prev => prev.map(tc =>
       tc.tc_id === tcId ? { ...tc, ...data, status: 'Draft' } : tc
